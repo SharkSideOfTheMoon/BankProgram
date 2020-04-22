@@ -31,8 +31,11 @@ def Startup():
             try:
                 with sqlite3.connect('LoginDataBase.db') as DbConnect:
                     c = DbConnect.cursor()
-                    c.execute("INSERT  INTO LoginDataBaseTable (Username, Password) VALUES (?, ?)", [str_newusername, str_newpassword])
+                    c.execute("INSERT INTO LoginDataBaseTable (Username, Password) VALUES (?, ?)", [str_newusername, str_newpassword])
+                    c.execute("INSERT INTO BankAccountDataTable (Username, Account_Balance_Current, Interest_Generated) VALUES (?,?,?)", [str_newusername, 0, 0])
                     DbConnect.commit()
+                    sw.destroy()
+                    Startup()
                     
             except sqlite3.Error as e:
                 sw_username_taken_label = tkinter.Label(sw, text = "This username was taken, please try another one.").pack()
@@ -49,6 +52,7 @@ def Startup():
 
 
         sw_okButton = tkinter.Button(sw, command = sw_GetEntries, text = "OK!").pack()
+        sw.mainloop()
         
     def moveOn():
         window.destroy()
