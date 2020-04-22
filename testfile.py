@@ -40,16 +40,11 @@ def Startup():
             except sqlite3.Error as e:
                 sw_username_taken_label = tkinter.Label(sw, text = "This username was taken, please try another one.").pack()
                 DbConnect.close()
-            
-                    
-            
-        
+
         def sw_GetEntries():
             str_newusername = sw_username_entrybox.get()
             str_newpassword = sw_password_entrybox.get()
             TryCreateUser(str_newusername, str_newpassword)
-
-
 
         sw_okButton = tkinter.Button(sw, command = sw_GetEntries, text = "OK!").pack()
         sw.mainloop()
@@ -59,7 +54,27 @@ def Startup():
         window2 = tkinter.Tk()
         window2.title("Banking Program")
         window2.geometry("960x540")
-        
+
+        var_current_account_balance = 0
+        var_current_account_generated_interest = 0
+
+        def GetVariablesForSetup():
+            with sqlite3.connect('LoginDataBase.db') as DbConnect:
+                c = DbConnect.cursor()
+                var_select = []
+                var_select.append(var_UID)
+                var_select.append(var_current_user_username)
+                sql = 'SELECT * FROM BankAccountDataTable WHERE User_Number = ? AND Username = ?';
+                c.execute(sql, var_select)
+                result = c.fetchall()
+                print(result)
+                for row in result:
+                    var_current_account_balance = int(row[2])
+                    var_current_account_generated_interest = int(row[3])
+
+        GetVariablesForSetup()
+                
+ 
     def Login(username_string, password_string):
         
         var_select = []
@@ -73,6 +88,8 @@ def Startup():
             print(result)
             for row in result:
                 global var_UID
+                global var_current_user_username
+                var_current_user_username = str(row[1])
                 var_UID = int(row[0])
                 print(var_UID)
             if(len(result) != 0):
@@ -87,7 +104,6 @@ def Startup():
         password_string = password_entrybox.get()
         print(username_string, password_string)
         Login(username_string, password_string)
-        
         
     ok_button = tkinter.Button(window, command = GetEntries, text = "OK!").pack()
     signup_button = tkinter.Button(window, command = SignupWindowFunc, text = "Sign up!")
