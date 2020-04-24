@@ -1,6 +1,7 @@
 import sqlite3
 import tkinter
 import random
+from functools import partial
 
 def Startup():
     window = tkinter.Tk()
@@ -64,11 +65,11 @@ def Startup():
             for row in result:
                 var_current_account_balance = float(row[2])
                 print(var_current_account_balance)
-                var_current_account_generated_interest = float(row[3])
+                var_current_account_generated_interest = float(row[3])        
                     
     def moveOn():
         global var_current_account_balance
-        global var_current_account_generated_interest 
+        global var_current_account_generated_interest
         window.destroy()
         window2 = tkinter.Tk()
         window2.title("Banking Program")
@@ -78,7 +79,7 @@ def Startup():
         print(var_current_account_generated_interest)
         var_current_account_balance_interest_added = round((var_current_account_balance * 1.002), 2)
         var_current_account_generated_interest = var_current_account_generated_interest + (var_current_account_balance_interest_added - var_current_account_balance)
-        logged_in_message = "You are logged in as: {}".format(var_current_user_username)
+        logged_in_message = "You are logged in as: {}          Your UID is {}".format(var_current_user_username, var_UID)
         balance_message = "Your Current Balance is: £{}".format(var_current_account_balance_interest_added)
         interest_message = "Your Current Generated interest is: £{}         (Interest is generated every time you run the program and successfully log in.)".format(round(var_current_account_generated_interest, 2))
 
@@ -93,11 +94,66 @@ def Startup():
         username_label = tkinter.Label(window2, text = logged_in_message).pack() 
         balance_label = tkinter.Label(window2, text = balance_message).pack()
         interest_label = tkinter.Label(window2, text = interest_message).pack()
+
+        space_label = tkinter.Label(window2).pack()
+        enter_user_for_transaction_label = tkinter.Label(window2, text = "Please Enter A User For Transaction to, in format UID_NAME").pack()
+        enter_user_for_transaction_entrybox = tkinter.Entry(window2)
+        enter_user_for_transaction_entrybox.pack()
+        enter_ammount_to_exchange_label = tkinter.Label(window2, text = "Please enter the ammount in £ you would like to transfer (Enter only a number)").pack()
+        enter_ammount_to_exchange_entrybox = tkinter.Entry(window2)
+        enter_ammount_to_exchange_entrybox.pack()
+
+        def PayUser(tempvar_UID ,account, ammount):
+            print(account)
+            print(tempvar_UID)
+            print(var_current_user_username)
+            print(ammount)
+
         
+        
+        def FailWindowFunc():
+            failwindow = tkinter.Tk()
+            failwindow.title("User Does Not Exist!")
+            failwindow.geometry("400x150")
+            fail_window_label = tkinter.Label(failwindow, text ="That user does not exist!").pack()
+            fail_space_label = tkinter.Label(failwindow).pack()
+            fail_space_label2 = tkinter.Label(failwindow).pack()
+            fail_space_label3 = tkinter.Label(failwindow).pack()
+            fail_window_label_exit = tkinter.Label(failwindow, text = "Please press OK to exit this window").pack()
+            def DestroyFailWindow():
+                failwindow.destroy()
+            
+            fail_ok_button = tkinter.Button(failwindow, command = DestroyFailWindow, text = "OK!")
+            fail_ok_button.pack()
 
+            failwindow.mainloop()
+            
 
+        def CheckUserExists(var_UID2, var_Username):
+            with sqlite3.connect('LoginDataBase.db') as DbConnect:
+                c = DbConnect.cursor()
+                var_select = []
+                var_select.append(var_UID2)
+                var_select.append(var_Username)
+                sql = 'SELECT * FROM LoginDataBaseTable WHERE User_Number = ? AND Username = ?';
+                c.execute(sql, var_select)
+                result = c.fetchall()
+                if(len(result) != 0):
+                    print("Yay!")
+                else:
+                    FailWindowFunc()
 
+        def GetInfo():
+            recieving_account = enter_user_for_transaction_entrybox.get()
+            recieving_account_UID = 2
+            recieving_account_parsed_name = recieving_account
+            money_to_transfer = float(enter_ammount_to_exchange_entrybox.get())
+            print("tester")
+            CheckUserExists(recieving_account_UID, recieving_account)
+            PayUser(recieving_account_UID, recieving_account_parsed_name, money_to_transfer)
 
+        pay_user_button = tkinter.Button(window2, command = GetInfo, text = "Pay User")
+        pay_user_button.pack()
 
         window2.mainloop()
  
