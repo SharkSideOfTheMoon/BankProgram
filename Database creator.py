@@ -15,7 +15,7 @@ c.execute("""CREATE TABLE if NOT EXISTS BankAccountDataTable
           
 c.execute("INSERT INTO BankAccountDataTable (Username, Account_Balance_Current) VALUES (?,?)", ["Patrick", 456000])
 c.execute("INSERT INTO BankAccountDataTable (Username, Account_Balance_Current) VALUES (?,?)", ["Joesph", 120000])
-c.execute("INSERT INTO BankAccountDataTable (Username, Account_Balance_Current) VALUES (?,?)", ["HAEC-School", 46700])
+c.execute("INSERT INTO BankAccountDataTable (Username, Account_Balance_Current, Interest_Generated) VALUES (?,?,?)", ["HAEC-School", 46700])
 c.execute("INSERT INTO BankAccountDataTable (Username, Account_Balance_Current) VALUES (?,?)", ["Alexis", 76432])
 
 DbConnect.commit()
