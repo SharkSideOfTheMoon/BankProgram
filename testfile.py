@@ -21,7 +21,7 @@ def Startup():
         sw.geometry("400x150")
         swLabel = tkinter.Label(sw, text = "Welcome to the signup page!").pack()
         sw_username_label = tkinter.Label(sw, text = "Enter Username below").pack()
-        sw_username_entrybox = tkinter.Entry(sw)
+        sw_username_entrybox = tkinter.Entry(sw, show = "*")
         sw_username_entrybox.pack()
         sw_password_label = tkinter.Label(sw, text = "Enter Password Below").pack()
         sw_password_entrybox = tkinter.Entry(sw)
