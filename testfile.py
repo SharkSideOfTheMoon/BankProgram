@@ -1,7 +1,6 @@
 import sqlite3
 import tkinter
-import random
-from functools import partial
+import math
 
 def Startup():
     window = tkinter.Tk()
@@ -15,6 +14,24 @@ def Startup():
     password_entrybox = tkinter.Entry(window, show = "*")
     password_entrybox.pack()
 
+    def FailWindowFunc(error_message):
+            failwindow = tkinter.Tk()
+            failwindow.title(error_message)
+            failwindow.geometry("400x150")
+            message_to_display = error_message
+            fail_window_label = tkinter.Label(failwindow, text = error_message).pack()
+            fail_space_label = tkinter.Label(failwindow).pack()
+            fail_space_label2 = tkinter.Label(failwindow).pack()
+            fail_space_label3 = tkinter.Label(failwindow).pack()
+            fail_window_label_exit = tkinter.Label(failwindow, text = "Please press OK to exit this window").pack()
+            def DestroyFailWindow():
+                failwindow.destroy()
+            
+            fail_ok_button = tkinter.Button(failwindow, command = DestroyFailWindow, text = "OK!")
+            fail_ok_button.pack()
+
+            failwindow.mainloop()
+            
     def SignupWindowFunc():
         window.destroy()
         sw = tkinter.Tk()
@@ -22,10 +39,10 @@ def Startup():
         sw.geometry("400x150")
         swLabel = tkinter.Label(sw, text = "Welcome to the signup page!").pack()
         sw_username_label = tkinter.Label(sw, text = "Enter Username below").pack()
-        sw_username_entrybox = tkinter.Entry(sw, show = "*")
+        sw_username_entrybox = tkinter.Entry(sw)
         sw_username_entrybox.pack()
         sw_password_label = tkinter.Label(sw, text = "Enter Password Below").pack()
-        sw_password_entrybox = tkinter.Entry(sw)
+        sw_password_entrybox = tkinter.Entry(sw, show = "*")
         sw_password_entrybox.pack()
 
         def TryCreateUser(str_newusername, str_newpassword):
@@ -40,12 +57,20 @@ def Startup():
                     
             except sqlite3.Error as e:
                 sw_username_taken_label = tkinter.Label(sw, text = "This username was taken, please try another one.").pack()
-                DbConnect.close()
+                sw_username_entrybox.delete(0, "end")
+                sw_password_entrybox.delete(0, "end")
+                
 
         def sw_GetEntries():
             str_newusername = sw_username_entrybox.get()
-            str_newpassword = sw_password_entrybox.get()
-            TryCreateUser(str_newusername, str_newpassword)
+            if(str_newusername.find("_") != -1):
+                 print("Found!")
+                 FailWindowFunc("Name Contained Illegal Character '_'")
+                 sw_username_entrybox.delete(0, "end")
+                 sw_password_entrybox.delete(0, "end")
+            else:
+                str_newpassword = sw_password_entrybox.get()
+                TryCreateUser(str_newusername, str_newpassword)
 
         sw_okButton = tkinter.Button(sw, command = sw_GetEntries, text = "OK!").pack()
         sw.mainloop()
@@ -65,11 +90,17 @@ def Startup():
             for row in result:
                 var_current_account_balance = float(row[2])
                 print(var_current_account_balance)
-                var_current_account_generated_interest = float(row[3])        
+                var_current_account_generated_interest = float(row[3])
+
+    def round_down(n, decimals=0):
+        multiplier = 10 ** decimals
+        return math.floor(n * multiplier) / multiplier
                     
     def moveOn():
         global var_current_account_balance
+        global var_current_account_balance_interest_added
         global var_current_account_generated_interest
+        global balance_message
         window.destroy()
         window2 = tkinter.Tk()
         window2.title("Banking Program")
@@ -77,11 +108,14 @@ def Startup():
 
         GetVariablesForSetup()
         print(var_current_account_generated_interest)
-        var_current_account_balance_interest_added = round((var_current_account_balance * 1.002), 2)
+        var_current_account_balance_interest_added = round_down((var_current_account_balance * 1.002), 2)
         var_current_account_generated_interest = var_current_account_generated_interest + (var_current_account_balance_interest_added - var_current_account_balance)
         logged_in_message = "You are logged in as: {}          Your UID is {}".format(var_current_user_username, var_UID)
+        balance_message_label_text = tkinter.StringVar()
+        
         balance_message = "Your Current Balance is: £{}".format(var_current_account_balance_interest_added)
-        interest_message = "Your Current Generated interest is: £{}         (Interest is generated every time you run the program and successfully log in.)".format(round(var_current_account_generated_interest, 2))
+        balance_message_label_text.set(balance_message)
+        interest_message = "Your Current Generated interest is: £{}         (Interest is generated every time you run the program and successfully log in.)".format(round_down(var_current_account_generated_interest, 2))
 
         with sqlite3.connect('LoginDataBase.db') as DbConnect:
             c = DbConnect.cursor()
@@ -90,67 +124,86 @@ def Startup():
             c.execute(sql_update_statement, Values)
             DbConnect.commit()
             
+        
         print(balance_message)
         username_label = tkinter.Label(window2, text = logged_in_message).pack() 
-        balance_label = tkinter.Label(window2, text = balance_message).pack()
+        balance_label = tkinter.Label(window2, textvariable = balance_message_label_text).pack()
         interest_label = tkinter.Label(window2, text = interest_message).pack()
 
         space_label = tkinter.Label(window2).pack()
-        enter_user_for_transaction_label = tkinter.Label(window2, text = "Please Enter A User For Transaction to, in format UID_NAME").pack()
+        enter_user_for_transaction_label = tkinter.Label(window2, text = "Please Enter A User For Transaction to, in format [UID_NAME]").pack()
         enter_user_for_transaction_entrybox = tkinter.Entry(window2)
         enter_user_for_transaction_entrybox.pack()
-        enter_ammount_to_exchange_label = tkinter.Label(window2, text = "Please enter the ammount in £ you would like to transfer (Enter only a number)").pack()
+        enter_ammount_to_exchange_label = tkinter.Label(window2, text = "Please enter the amount in £ you would like to transfer (Enter only a number)").pack()
         enter_ammount_to_exchange_entrybox = tkinter.Entry(window2)
         enter_ammount_to_exchange_entrybox.pack()
 
         def PayUser(tempvar_UID ,account, ammount):
-            print(account)
-            print(tempvar_UID)
-            print(var_current_user_username)
-            print(ammount)
+            global var_current_account_balance_interest_added
+            global balance_message
+            ammount = round_down(ammount,2)
+            tempbalance = var_current_account_balance_interest_added - ammount
 
-        
-        
-        def FailWindowFunc():
-            failwindow = tkinter.Tk()
-            failwindow.title("User Does Not Exist!")
-            failwindow.geometry("400x150")
-            fail_window_label = tkinter.Label(failwindow, text ="That user does not exist!").pack()
-            fail_space_label = tkinter.Label(failwindow).pack()
-            fail_space_label2 = tkinter.Label(failwindow).pack()
-            fail_space_label3 = tkinter.Label(failwindow).pack()
-            fail_window_label_exit = tkinter.Label(failwindow, text = "Please press OK to exit this window").pack()
-            def DestroyFailWindow():
-                failwindow.destroy()
+            if(tempbalance > 0):
+                print("Enoguh money")
+                second_user_balance = 0.0
+                with sqlite3.connect('LoginDataBase.db') as DbConnect:
+                    c = DbConnect.cursor()
+                    var_select = []
+                    var_select.append(tempvar_UID)
+                    var_select.append(account)
+                    sql_statement_get_second_user_balance = 'SELECT * FROM BankAccountDataTable WHERE User_Number = ? AND Username = ?';
+                    c.execute(sql_statement_get_second_user_balance, var_select)
+                    result = c.fetchall()
+                    print(result)                
+                    for row in result:
+                        print("got here")
+                        second_user_balance = float(row[2])  
+                    second_user_balance = round_down(second_user_balance, 2)
+                    print("Second User data " + str(second_user_balance))
+                    second_user_balance = second_user_balance + ammount
+                    var_current_account_balance_interest_added = tempbalance
+                    sql_update_statement_transaction_give = "UPDATE BankAccountDataTable SET Account_Balance_Current = ? WHERE User_Number = ? AND Username = ?"
+                    sql_update_statement_transaction_recieve = "UPDATE BankAccountDataTable SET Account_Balance_Current = ? WHERE User_Number = ? AND Username = ?"
+                    Values2 = (var_current_account_balance_interest_added, var_UID, var_current_user_username)
+                    Values3 = (second_user_balance, tempvar_UID, account)
+                    c.execute(sql_update_statement_transaction_give, Values2)
+                    c.execute(sql_update_statement_transaction_recieve, Values3)
+                    balance_message = "Your Current Balance is: £{}".format(var_current_account_balance_interest_added)
+                    DbConnect.commit()
+                    
+            else:
+                FailWindowFunc("Not enough money")
             
-            fail_ok_button = tkinter.Button(failwindow, command = DestroyFailWindow, text = "OK!")
-            fail_ok_button.pack()
 
-            failwindow.mainloop()
-            
-
-        def CheckUserExists(var_UID2, var_Username):
+        def CheckUserExists(var_UID2, var_Username, money_to_transfer):
             with sqlite3.connect('LoginDataBase.db') as DbConnect:
                 c = DbConnect.cursor()
                 var_select = []
                 var_select.append(var_UID2)
                 var_select.append(var_Username)
-                sql = 'SELECT * FROM LoginDataBaseTable WHERE User_Number = ? AND Username = ?';
+                sql = 'SELECT * FROM BankAccountDataTable WHERE User_Number = ? AND Username = ?';
                 c.execute(sql, var_select)
                 result = c.fetchall()
                 if(len(result) != 0):
-                    print("Yay!")
+                    PayUser(var_UID2, var_Username, money_to_transfer)
                 else:
-                    FailWindowFunc()
+                    FailWindowFunc("User Does Not Exist!")
+
+        def RefreshPage():
+            global balance_message
+            balance_message_label_text.set(balance_message)
 
         def GetInfo():
             recieving_account = enter_user_for_transaction_entrybox.get()
-            recieving_account_UID = 2
-            recieving_account_parsed_name = recieving_account
+            parts_of_full_input = recieving_account.split('_')
+            recieving_account_UID = int(parts_of_full_input[0])
+            print(recieving_account_UID)
+            recieving_account_parsed_name = parts_of_full_input[1]
+            print(recieving_account_parsed_name)
             money_to_transfer = float(enter_ammount_to_exchange_entrybox.get())
-            print("tester")
-            CheckUserExists(recieving_account_UID, recieving_account)
-            PayUser(recieving_account_UID, recieving_account_parsed_name, money_to_transfer)
+            CheckUserExists(recieving_account_UID, recieving_account_parsed_name, money_to_transfer)
+            RefreshPage()
 
         pay_user_button = tkinter.Button(window2, command = GetInfo, text = "Pay User")
         pay_user_button.pack()
