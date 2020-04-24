@@ -44,7 +44,7 @@ def Startup():
         sw_password_label = tkinter.Label(sw, text = "Enter Password Below").pack()
         sw_password_entrybox = tkinter.Entry(sw, show = "*")
         sw_password_entrybox.pack()
-
+            
         def TryCreateUser(str_newusername, str_newpassword):
             try:
                 with sqlite3.connect('LoginDataBase.db') as DbConnect:
@@ -58,19 +58,21 @@ def Startup():
             except sqlite3.Error as e:
                 sw_username_taken_label = tkinter.Label(sw, text = "This username was taken, please try another one.").pack()
                 sw_username_entrybox.delete(0, "end")
-                sw_password_entrybox.delete(0, "end")
-                
+                sw_password_entrybox.delete(0, "end")               
 
         def sw_GetEntries():
             str_newusername = sw_username_entrybox.get()
+            str_newpassword = sw_password_entrybox.get()
+
             if(str_newusername.find("_") != -1):
                  print("Found!")
                  FailWindowFunc("Name Contained Illegal Character '_'")
-                 sw_username_entrybox.delete(0, "end")
-                 sw_password_entrybox.delete(0, "end")
+                 
             else:
-                str_newpassword = sw_password_entrybox.get()
-                TryCreateUser(str_newusername, str_newpassword)
+                if(str_newusername == "" or str_newpassword == ""):
+                    FailWindowFunc("Must have both username and password")
+                else:
+                    TryCreateUser(str_newusername, str_newpassword)
 
         sw_okButton = tkinter.Button(sw, command = sw_GetEntries, text = "OK!").pack()
         sw.mainloop()
@@ -202,8 +204,12 @@ def Startup():
             recieving_account_parsed_name = parts_of_full_input[1]
             print(recieving_account_parsed_name)
             money_to_transfer = float(enter_ammount_to_exchange_entrybox.get())
-            CheckUserExists(recieving_account_UID, recieving_account_parsed_name, money_to_transfer)
-            RefreshPage()
+            if(money_to_transfer > 0):
+                CheckUserExists(recieving_account_UID, recieving_account_parsed_name, money_to_transfer)
+                RefreshPage()
+            else:
+                FailWindowFunc("The transfer amount was less than or equal to 0")
+            
 
         pay_user_button = tkinter.Button(window2, command = GetInfo, text = "Pay User")
         pay_user_button.pack()
@@ -229,9 +235,9 @@ def Startup():
             if(len(result) != 0):
                 moveOn()
             else:
-                fail_Label = tkinter.Label(window, text = "That was an invalid login, try again").pack()
-                username_entrybox.delete(0, "end")
-                password_entrybox.delete(0, "end")      
+                FailWindowFunc("Invalid Login Username or Password!")
+                #username_entrybox.delete(0, "end")
+                #password_entrybox.delete(0, "end")      
 
     def GetEntries():
         username_string = username_entrybox.get()
