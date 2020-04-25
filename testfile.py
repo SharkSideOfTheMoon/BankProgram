@@ -203,13 +203,16 @@ def Startup():
             print(recieving_account_UID)
             recieving_account_parsed_name = parts_of_full_input[1]
             print(recieving_account_parsed_name)
-            money_to_transfer = float(enter_ammount_to_exchange_entrybox.get())
-            if(money_to_transfer > 0):
-                CheckUserExists(recieving_account_UID, recieving_account_parsed_name, money_to_transfer)
-                RefreshPage()
-            else:
-                FailWindowFunc("The transfer amount was less than or equal to 0")
-            
+            try:
+                money_to_transfer = float(enter_ammount_to_exchange_entrybox.get())
+                if(money_to_transfer > 0):
+                    CheckUserExists(recieving_account_UID, recieving_account_parsed_name, money_to_transfer)
+                    RefreshPage()
+                else:
+                    FailWindowFunc("The transfer amount was less than or equal to 0")
+            except ValueError as e:
+                FailWindowFunc("That was not a number")
+                #enter_ammount_to_exchange_entrybox.delete(0, "end")
 
         pay_user_button = tkinter.Button(window2, command = GetInfo, text = "Pay User")
         pay_user_button.pack()
