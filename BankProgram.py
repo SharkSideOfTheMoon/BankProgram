@@ -66,7 +66,6 @@ def Startup():
             str_newpassword = sw_password_entrybox.get()
 
             if(str_newusername.find("_") != -1):
-                 print("Found!")
                  FailWindowFunc("Name Contained Illegal Character '_'")
                  
             else:
@@ -89,10 +88,8 @@ def Startup():
             sql = 'SELECT * FROM BankAccountDataTable WHERE User_Number = ? AND Username = ?';
             c.execute(sql, var_select)
             result = c.fetchall()
-            print(result)                
             for row in result:
                 var_current_account_balance = float(row[2])
-                print(var_current_account_balance)
                 var_current_account_generated_interest = float(row[3])
 
     def round_down(n, decimals=0):
@@ -111,7 +108,6 @@ def Startup():
         window2.geometry("960x540")
 
         GetVariablesForSetup()
-        print(var_current_account_generated_interest)
         var_current_account_balance_interest_added = round_down((var_current_account_balance * 1.002), 2)
         var_current_account_generated_interest = round_down(var_current_account_generated_interest + (var_current_account_balance_interest_added - var_current_account_balance), 2)
         logged_in_message = "You are logged in as: {}          Your UID is {}".format(var_current_user_username, var_UID)
@@ -128,8 +124,6 @@ def Startup():
             c.execute(sql_update_statement, Values)
             DbConnect.commit()
             
-        
-        print(balance_message)
         username_label = tkinter.Label(window2, text = logged_in_message).pack() 
         balance_label = tkinter.Label(window2, textvariable = balance_message_label_text).pack()
         interest_label = tkinter.Label(window2, text = interest_message).pack()
@@ -155,7 +149,6 @@ def Startup():
                     sql_statement_find_history = 'SELECT * FROM TransactionHistoryTable WHERE User_Number_1 = ? AND User_Name_1 = ? OR User_Number_2 = ? AND Username_2 = ?';
                     c.execute(sql_statement_find_history, var_select)
                     result_history = c.fetchall()
-                    print(result_history)                
                     for row in result_history:
                         i = i + 1
                 return i
@@ -180,7 +173,6 @@ def Startup():
                     sql_statement_find_history = 'SELECT * FROM TransactionHistoryTable WHERE User_Number_1 = ? AND User_Name_1 = ? OR User_Number_2 = ? AND Username_2 = ?';
                     c.execute(sql_statement_find_history, var_select)
                     result_history = c.fetchall()
-                    print(result_history)                
                     for row in result_history:
                         str_message = "Date: {} || {} ---> {} || £{}\n".format(row[0], row[2], row[4], row[5])
                         hw_text_box.insert(tkinter.END, str_message)
@@ -189,7 +181,6 @@ def Startup():
             date_not_clipped = str(datetime.datetime.now())
             date_clipped_array = date_not_clipped.split('.')
             date_clipped = date_clipped_array[0]
-            print(date_clipped)
             with sqlite3.connect('LoginDataBase.db') as DbConnect:
                 c = DbConnect.cursor()
                 c.execute("INSERT INTO TransactionHistoryTable (Date, User_Number_1, User_Name_1, User_Number_2, Username_2, Payment_Amount) VALUES (?,?,?,?,?,?)", [date_clipped, UID, current_user, UID2, current_user_2, payment])
@@ -203,7 +194,6 @@ def Startup():
             tempbalance = var_current_account_balance_interest_added - ammount
 
             if(tempbalance > 0):
-                print("Enoguh money")
                 second_user_balance = 0.0
                 with sqlite3.connect('LoginDataBase.db') as DbConnect:
                     c = DbConnect.cursor()
@@ -213,12 +203,9 @@ def Startup():
                     sql_statement_get_second_user_balance = 'SELECT * FROM BankAccountDataTable WHERE User_Number = ? AND Username = ?';
                     c.execute(sql_statement_get_second_user_balance, var_select)
                     result = c.fetchall()
-                    print(result)                
                     for row in result:
-                        print("got here")
                         second_user_balance = float(row[2])  
                     second_user_balance = round_down(second_user_balance, 2)
-                    print("Second User data " + str(second_user_balance))
                     second_user_balance = second_user_balance + ammount
                     var_current_account_balance_interest_added = tempbalance
                     var_current_account_balance_interest_added = round_down(var_current_account_balance_interest_added, 2)
@@ -261,9 +248,7 @@ def Startup():
             parts_of_full_input = recieving_account.split('_')
             try:
                 recieving_account_UID = int(parts_of_full_input[0])
-                print(recieving_account_UID)
                 recieving_account_parsed_name = parts_of_full_input[1]
-                print(recieving_account_parsed_name)
                 if(recieving_account_UID != var_UID):
                     try:
                         money_to_transfer = float(enter_ammount_to_exchange_entrybox.get())
@@ -299,13 +284,11 @@ def Startup():
             sql = 'SELECT * FROM LoginDataBaseTable WHERE Username = ? AND Password = ?';
             c.execute(sql, var_select)
             result = c.fetchall()
-            print(result)
             for row in result:
                 global var_UID
                 global var_current_user_username
                 var_current_user_username = str(row[1])
                 var_UID = int(row[0])
-                print(var_UID)
             if(len(result) != 0):
                 moveOn()
             else:
@@ -316,7 +299,6 @@ def Startup():
     def GetEntries():
         username_string = username_entrybox.get()
         password_string = password_entrybox.get()
-        print(username_string, password_string)
         Login(username_string, password_string)
         
     ok_button = tkinter.Button(window, command = GetEntries, text = "OK!").pack()
@@ -325,7 +307,6 @@ def Startup():
     window.mainloop()
 
 Startup()
-print("The program ran successfully, at least to this point")
 print("The program will exit now")
 
 
