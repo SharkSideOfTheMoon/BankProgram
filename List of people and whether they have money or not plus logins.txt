@@ -1,8 +1,8 @@
-"Patrick"	bruh          // has money
-"Joseph"	123Pass  // has money
-"HAEC-School"	Password10
-"Alexis"	NotFunny
-"God"	mybrudda          // has some money
-"Oliver Brunt"	Yeet      //has a little bit of money
-"Myman"	bruhtime
-"asdf"	asdf
+1 "Patrick"	bruh          // has money
+2 "Joseph"	123Pass  // has money
+3 "HAEC-School"	Password10
+4 "Alexis"	NotFunny
+5 "God"	mybrudda          // has some money
+6 "Oliver Brunt"	Yeet      //has a little bit of money
+7 "Myman"	bruhtime
+8 "asdf"	asdf
